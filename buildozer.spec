@@ -12,7 +12,6 @@ icon.filename = assets/icon.png
 requirements = python3,kivy,kivmob,pyrebase4
 
 android.permissions = INTERNET, ACCESS_NETWORK_STATE
-android.meta_data = com.google.android.gms.ads.APPLICATION_ID=ca-app-pub-8643407623577361~1203571307
 android.gradle_dependencies = com.google.android.gms:play-services-ads:22.1.0
 
 orientation = portrait
@@ -28,8 +27,6 @@ android.release_keyalias = AITNASSAR_Younes
 android.release_keystore_passwd = android
 android.release_keyalias_passwd = android
 
-android.entrypoint = org.kivy.android.PythonActivity
-android.allow_backup = True
 presplash.filename = assets/loading.png
 
 [buildozer]
