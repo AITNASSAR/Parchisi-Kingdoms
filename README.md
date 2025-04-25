@@ -1,65 +1,84 @@
 # Parchisi Kingdoms: Royal Edition
 
-A mobile board game built with Kivy and packaged for Android using Buildozer. Includes Firebase integration and AdMob ads.
-
-## 📱 Features
-
-- Beautiful Kivy UI (KV Language)
-- Firebase leaderboard support
-- AdMob integration (Banner, Interstitial, Rewarded)
-- Score tracking and saving
-- AI player logic
+🎮 **Parchisi Kingdoms** هو تطبيق لعبة لوحية تم تطويره باستخدام [Kivy](https://kivy.org/) و[Buildozer](https://github.com/kivy/buildozer) ويتم توليد ملف APK تلقائيًا باستخدام GitHub Actions.
 
 ---
 
-## 🧰 Requirements
+## 📦 مميزات التطبيق
 
-Install Python packages:
-
-```bash
-pip install -r requirements.txt
-```
-
-Install Buildozer (for Android build):
-
-```bash
-pip install buildozer
-sudo apt install -y openjdk-8-jdk unzip zip
-```
+- 🎲 لعبة Parchisi متعددة اللاعبين
+- 📊 نظام نقاط ولوحة متصدرين
+- ☁️ تكامل مع Firebase لتخزين النقاط
+- 💰 إعلانات AdMob (Banner, Interstitial, Rewarded)
+- 🤖 دعم اللاعبين الآليين (AI)
 
 ---
 
-## 🚀 Run Locally (Desktop)
+## ⚙️ متطلبات البناء اليدوي
 
 ```bash
-python main.py
-```
-
----
-
-## 📦 Build for Android
-
-1. Make sure `buildozer.spec` is configured (already included).
-2. Then run:
-
-```bash
+pip install buildozer cython
+sudo apt install zip unzip openjdk-17-jdk libltdl-dev autoconf automake libtool
 buildozer android debug
 ```
 
-To install on connected device:
+---
 
-```bash
-buildozer android deploy run
-```
+## 🚀 البناء التلقائي باستخدام GitHub Actions
+
+### 📁 المسار: `.github/workflows/build_apk.yml`
+
+عند رفع أي تغييرات إلى الفرع `main`، سيتم:
+
+1. تثبيت Java 17 و Python 3.10
+2. تحميل Android SDK و NDK
+3. تثبيت Buildozer والمتطلبات
+4. تنفيذ الأمر `buildozer android debug`
+5. رفع ملف APK داخل قسم **Artifacts**
 
 ---
 
-## ☁️ CI/CD (GitHub Actions)
+## 📥 تحميل الـ APK
 
-This project includes a GitHub Actions workflow that builds your APK automatically on push to the `main` branch.
+بعد تنفيذ الـ Workflow، يمكنك تحميل ملف APK النهائي من:
+
+**GitHub → Actions → آخر عملية تشغيل → Artifacts → `parchisi-kingdoms-apk.zip`**
 
 ---
 
-## 📄 License
+## 🛡️ تنويه
 
-MIT License © 2025
+لرفع التطبيق إلى متجر Google Play، يجب توقيع ملف APK باستخدام keystore خاص بك.
+
+---
+
+## 👨‍💻 المطور
+
+- الاسم: *اAITNASSAR Younes
+- البريد الإلكتروني: *Aitnassaryounes09@gmail.com*
+
+---
+
+## MIT License
+
+Copyright (c) 2025 AITNASSAR Younes
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+MIT © 2025
