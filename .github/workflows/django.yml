@@ -1,4 +1,4 @@
-name: Build Kivy APK with Buildozer (SDK Manager Fixed Path)
+name: Build Kivy APK with Buildozer (SDK Tools v9477386 Fix)
 
 on:
   push:
@@ -35,12 +35,11 @@ jobs:
     - name: Download and set up Android SDK (with Build Tools & AIDL)
       run: |
         mkdir -p $HOME/android-sdk/cmdline-tools
-        wget https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip -O sdk-tools.zip
+        wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O sdk-tools.zip
         unzip -q sdk-tools.zip -d $HOME/android-sdk/cmdline-tools
-        mkdir -p $HOME/android-sdk/cmdline-tools/latest
-        mv $HOME/android-sdk/cmdline-tools/cmdline-tools/* $HOME/android-sdk/cmdline-tools/latest/
+        mv $HOME/android-sdk/cmdline-tools/cmdline-tools $HOME/android-sdk/cmdline-tools/latest
         yes | $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses
-        $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --sdk_root=$HOME/android-sdk           "platform-tools"           "platforms;android-30"           "build-tools;30.0.3"           "ndk;25.1.8937393"
+        $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --sdk_root=$HOME/android-sdk           "platform-tools"           "platforms;android-30"           "build-tools;30.0.3"           "ndk;21.3.6528147"
 
     - name: Link SDK into Buildozer path
       run: |
