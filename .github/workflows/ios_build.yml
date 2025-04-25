@@ -27,7 +27,6 @@ jobs:
           source venv/bin/activate
           pip install --upgrade pip
           pip install cython sh pbxproj cookiecutter
-          echo "✅ All Python dependencies installed"
 
       - name: Clone kivy-ios repository
         run: |
@@ -54,7 +53,10 @@ jobs:
           cd ios/kivy-ios
           ./toolchain.py create ios myapp
 
-      - name: Copy app sources into Xcode project
+      - name: Ensure target directory exists
+        run: mkdir -p ./ios/kivy-ios/myapp-ios/myapp
+
+      - name: Sync app sources into Xcode project
         run: |
           rsync -a --delete ./ ./ios/kivy-ios/myapp-ios/myapp/
 
