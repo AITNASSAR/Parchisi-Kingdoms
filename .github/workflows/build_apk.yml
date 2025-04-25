@@ -7,41 +7,46 @@ on:
     branches: ["main"]
 
 jobs:
-  build-apk:
+  build:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
 
       - name: Validate assets
         run: |
           if [ ! -f assets/icon.png ]; then
             echo "⚠️ assets/icon.png missing—skipping icon check"
+          else
+            echo "✅ assets/icon.png found"
           fi
 
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y zip unzip openjdk-17-jdk python3-pip \
-                                  autoconf automake libtool pkg-config
+          sudo apt-get install -y \
+            libtool autoconf automake build-essential pkg-config zlib1g-dev \
+            openjdk-17-jdk zip unzip
 
-      - name: Run autoupdate (fix deprecated macros)
+      - name: Install Buildozer & Cython
         run: |
+          python -m pip install --upgrade pip
+          pip install buildozer cython
+
+      - name: Fix Autotools macros & update configure.ac
+        run: |
+          # run autoupdate if configure.ac exists
           if [ -f configure.ac ]; then
             autoupdate
+            # allow the LT_SYS_SYMBOL_USCORE macro
+            echo 'm4_pattern_allow([LT_SYS_SYMBOL_USCORE])' >> configure.ac
           fi
-
-      - name: Allow undefined Autoconf macros
-        run: |
-          # create m4 override if needed
-          echo 'm4_pattern_allow([LT_SYS_SYMBOL_USCORE])' >> configure.ac || true
-
-      - name: Export Android env vars
-        run: |
-          echo "ANDROIDNDK=$HOME/android-ndk-r25b" >> $GITHUB_ENV
-          echo "ANDROIDAPI=31"             >> $GITHUB_ENV
-          echo "ANDROIDMINAPI=21"          >> $GITHUB_ENV
 
       - name: Setup Android SDK for Buildozer
         run: |
@@ -60,15 +65,17 @@ jobs:
           mkdir -p ~/.buildozer/android/platform
           ln -s $HOME/android-sdk ~/.buildozer/android/platform/android-sdk
 
-      - name: Install Python tools & Buildozer
+      - name: Export Android env vars
         run: |
-          python3 -m pip install --upgrade pip cython buildozer
+          echo "ANDROIDNDK=$HOME/android-ndk-r25b" >> $GITHUB_ENV
+          echo "ANDROIDAPI=31"             >> $GITHUB_ENV
+          echo "ANDROIDMINAPI=21"          >> $GITHUB_ENV
 
-      - name: Build APK (debug, with verbose logs)
+      - name: Run Buildozer (debug)
         run: |
-          buildozer --debug android debug
+          buildozer --verbose android debug
 
-      - name: Upload APK artifact
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: parchisi-kingdoms-apk
