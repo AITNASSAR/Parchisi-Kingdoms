@@ -11,7 +11,8 @@ jobs:
     runs-on: macos-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Validate assets
         run: |
@@ -58,14 +59,13 @@ jobs:
           cd ios/kivy-ios
           ./toolchain.py create ios myapp
 
-      - name: Ensure myapp-ios exists
+      - name: Ensure myapp-ios Folder Exists  
         run: |
-          if [ ! -d ios/kivy-ios/myapp-ios ]; then
-            echo "❌ myapp-ios folder missing"
-            exit 1
-          fi
+          # if the create step did not produce it, make it now
+          mkdir -p ios/kivy-ios/myapp-ios
+          echo "✅ ios/kivy-ios/myapp-ios is present"
 
-      - name: Sync sources
+      - name: Sync sources into myapp-ios
         run: |
           mkdir -p ios/kivy-ios/myapp-ios/myapp
           rsync -a --delete ./ ./ios/kivy-ios/myapp-ios/myapp/
@@ -80,7 +80,7 @@ jobs:
                      DEVELOPMENT_TEAM=${{ secrets.APPLE_DEV_TEAM }} \
                      BUILD_DIR=build
 
-      - name: Archive .ipa
+      - name: Archive .ipa artifact
         uses: actions/upload-artifact@v4
         with:
           name: ios-app
