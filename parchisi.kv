@@ -1,0 +1,22 @@
+<MenuScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        Label: text: "Parchisi Kingdoms: Royal Edition"
+        Button: text: "ابدأ اللعبة"; on_release: app.root.current="game"
+        Button: text: "لوحة المتصدرين"; on_release: app.root.current="leaderboard"
+
+<GameScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        Label: text: "شاشة اللعبة"
+        Button: text: "حركة تالية"; on_release: root.on_next_move()
+        Button: text: "عودة للقائمة"; on_release: app.ads.show_interstitial(); app.root.current="menu"
+
+<LeaderboardScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        Label: text: "لوحة المتصدرين"
+        ScrollView:
+            GridLayout:
+                id: scores_grid; cols:1; size_hint_y:None; height:self.minimum_height
+        Button: text: "عودة"; on_release: app.root.current="menu"
