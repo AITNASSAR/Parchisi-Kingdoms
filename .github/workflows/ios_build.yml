@@ -52,6 +52,15 @@ jobs:
           source venv/bin/activate
           cd ios/kivy-ios
           ./toolchain.py create ios myapp
+          echo "✅ Xcode project created"
+          ls -la myapp-ios
+
+      - name: Validate Xcode project exists
+        run: |
+          if [ ! -d "ios/kivy-ios/myapp-ios/myapp.xcodeproj" ]; then
+            echo "❌ Xcode project not found!"
+            exit 1
+          fi
 
       - name: Ensure target directory exists
         run: mkdir -p ./ios/kivy-ios/myapp-ios/myapp
