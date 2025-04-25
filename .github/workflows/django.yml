@@ -1,13 +1,11 @@
-name: Build APK with Buildozer
+name: Build Kivy APK with Buildozer
 
 on:
   push:
-    branches: ["main"]
-  pull_request:
-    branches: ["main"]
+    branches: [ "main" ]
 
 jobs:
-  build-apk:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -19,18 +17,18 @@ jobs:
       with:
         python-version: '3.10'
 
-    - name: Install Buildozer & Dependencies
+    - name: Install Buildozer and dependencies
       run: |
         sudo apt update
-        sudo apt install -y zip unzip openjdk-17-jdk python3-pip wget
+        sudo apt install -y zip unzip openjdk-17-jdk python3-pip wget libgl1-mesa-dev
         pip install --upgrade pip
         pip install buildozer cython
 
-    - name: Install Android SDK and AIDL
+    - name: Download and set up Android SDK (with AIDL)
       run: |
         mkdir -p $HOME/android-sdk/cmdline-tools
-        wget https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip -O cmdline-tools.zip
-        unzip -q cmdline-tools.zip -d $HOME/android-sdk/cmdline-tools
+        wget https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip -O sdk-tools.zip
+        unzip -q sdk-tools.zip -d $HOME/android-sdk/cmdline-tools
         mkdir -p $HOME/android-sdk/cmdline-tools/latest
         mv $HOME/android-sdk/cmdline-tools/cmdline-tools/* $HOME/android-sdk/cmdline-tools/latest/
         yes | $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --sdk_root=$HOME/android-sdk --licenses
