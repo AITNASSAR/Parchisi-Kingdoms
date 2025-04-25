@@ -7,52 +7,44 @@ on:
     branches: ["main"]
 
 jobs:
-  build:
+  build-apk:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.9'
+        uses: actions/checkout@v4
 
       - name: Validate assets
         run: |
           if [ ! -f assets/icon.png ]; then
-            echo "⚠️ assets/icon.png missing—skipping icon check"
-          else
-            echo "✅ assets/icon.png found"
+            echo "⚠️ assets/icon.png missing—please add or generate placeholder"
+            exit 1
           fi
 
       - name: Install system dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            libtool autoconf automake build-essential pkg-config zlib1g-dev \
-            openjdk-17-jdk zip unzip
+            python3 python3-pip openjdk-11-jdk zip unzip \
+            autoconf automake libtool pkg-config zlib1g-dev
 
-      - name: Install Buildozer & Cython
+      - name: Upgrade Buildozer & Cython
         run: |
-          python -m pip install --upgrade pip
-          pip install buildozer cython
+          pip3 install --upgrade pip
+          pip3 install buildozer cython
 
-      - name: Fix Autotools macros & update configure.ac
+      - name: Fix Autoconf macros & update configure.ac
         run: |
-          # run autoupdate if configure.ac exists
           if [ -f configure.ac ]; then
             autoupdate
-            # allow the LT_SYS_SYMBOL_USCORE macro
             echo 'm4_pattern_allow([LT_SYS_SYMBOL_USCORE])' >> configure.ac
           fi
 
       - name: Setup Android SDK for Buildozer
         run: |
           mkdir -p $HOME/android-sdk/cmdline-tools
-          wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O sdk-tools.zip
-          unzip -q sdk-tools.zip -d $HOME/android-sdk/cmdline-tools
+          wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O cmdline-tools.zip
+          unzip -q cmdline-tools.zip -d $HOME/android-sdk/cmdline-tools
           mv $HOME/android-sdk/cmdline-tools/cmdline-tools $HOME/android-sdk/cmdline-tools/latest
           ln -s $HOME/android-sdk/cmdline-tools/latest $HOME/android-sdk/tools
           yes | $HOME/android-sdk/tools/bin/sdkmanager --licenses
@@ -71,11 +63,11 @@ jobs:
           echo "ANDROIDAPI=31"             >> $GITHUB_ENV
           echo "ANDROIDMINAPI=21"          >> $GITHUB_ENV
 
-      - name: Run Buildozer (debug)
+      - name: Build APK (verbose debug)
         run: |
           buildozer --verbose android debug
 
-      - name: Upload APK
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: parchisi-kingdoms-apk
