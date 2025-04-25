@@ -1,55 +1,48 @@
 [app]
 
-# معلومات التطبيق
+# Ù…Ø¹Ù„ÙˆÙ…Ø§Øª Ø§Ù„ØªØ·Ø¨ÙŠÙ‚
 title = Parchisi Kingdoms: Royal Edition
 package.name = parchisi_kingdoms
 package.domain = org.example
 version = 1.0
 
-# مسار الملفات والمصادر
+# Ù…Ø³Ø§Ø± Ø§Ù„Ù…ØµØ§Ø¯Ø±
 source.dir = .
 source.include_exts = py,png,jpg,kv,json,ttf,wav,ogg,mp3
 
-# أيقونة التطبيق
+# Ø£ÙŠÙ‚ÙˆÙ†Ø© Ø§Ù„ØªØ·Ø¨ÙŠÙ‚ (ØªØ£ÙƒØ¯ Ù…Ù† ÙˆØ¬ÙˆØ¯Ù‡Ø§ Ø£Ùˆ Ø¹Ù„Ù‘Ù‚ Ø§Ù„Ø³Ø·Ø±)
 icon.filename = assets/icon.png
 
-# المتطلبات
+# Ø§Ù„Ù…ØªØ·Ù„Ø¨Ø§Øª
 requirements = python3,kivy,kivmob,pyrebase4
 
-# صلاحيات الوصول
+# ØµÙ„Ø§Ø­ÙŠØ§Øª Ø§Ù„ÙˆØµÙˆÙ„
 android.permissions = INTERNET, ACCESS_NETWORK_STATE
 
-# بيانات AdMob
+# AdMob
 android.meta_data = com.google.android.gms.ads.APPLICATION_ID=ca-app-pub-8643407623577361~1203571307
 android.gradle_dependencies = com.google.android.gms:play-services-ads:22.1.0
 
-# الإعدادات الرسومية
+# Ø¥Ø¹Ø¯Ø§Ø¯Ø§Øª Ø§Ù„Ø¹Ø±Ø¶
 orientation = portrait
 fullscreen = 0
 
-# إصدار Android المستهدف
+# Ø¥ØµØ¯Ø§Ø± Android
 android.api = 31
 android.minapi = 21
 android.ndk = 25b
 android.accept_sdk_license = True
 
-# التوقيع لإصدار APK
+# ØªÙˆÙ‚ÙŠØ¹ APK
 android.release_keystore = AITNASSAR_Younes.keystore
 android.release_keyalias = AITNASSAR_Younes
 android.release_keystore_passwd = android
 android.release_keyalias_passwd = android
 
-# نقطة الدخول
+# Ø£Ø®Ø±Ù‰
 android.entrypoint = org.kivy.android.PythonActivity
 android.allow_backup = True
-
-# شاشة تحميل أولية
 presplash.filename = assets/loading.png
-
-# إعدادات أخرى (متقدمة)
-android.use_android_native_api = False
-android.add_src = 
-android.add_jars = 
 
 [buildozer]
 log_level = 2
