@@ -32,7 +32,12 @@ jobs:
         source venv/bin/activate
         git clone https://github.com/kivy/kivy-ios.git ios/kivy-ios
 
-    - name: Fix toolchain.py permissions
+    - name: Fix toolchain.py permissions and validate shebang
+  run: |
+    if ! grep -q '^#!' ios/kivy-ios/toolchain.py; then
+      echo '#!/usr/bin/env python3' | cat - ios/kivy-ios/toolchain.py > temp && mv temp ios/kivy-ios/toolchain.py
+    fi
+    chmod +x ios/kivy-ios/toolchain.py
       run: |
         chmod +x ios/kivy-ios/toolchain.py
 
