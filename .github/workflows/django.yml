@@ -1,4 +1,4 @@
-ame: Build Kivy APK with Buildozer (with AIDL fix)
+name: Build Kivy APK with Buildozer (with AIDL fix)
 
 on:
   push:
