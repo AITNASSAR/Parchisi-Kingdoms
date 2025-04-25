@@ -32,11 +32,20 @@ jobs:
           ls -l ios/kivy-ios/toolchain.py
           head -n 50 ios/kivy-ios/toolchain.py
 
-      - name: Make toolchain.py executable & build toolchain
+      - name: Validate and fix toolchain.py shebang & permissions
+        run: |
+          # إذا لم يكن هناك shebang في الأعلى، أضفه
+          if ! grep -q "^#!/usr/bin/env python3" ios/kivy-ios/toolchain.py; then
+            echo "Adding shebang to toolchain.py"
+            (echo "#!/usr/bin/env python3"; cat ios/kivy-ios/toolchain.py) > ios/kivy-ios/toolchain.py.fixed
+            mv ios/kivy-ios/toolchain.py.fixed ios/kivy-ios/toolchain.py
+          fi
+          chmod +x ios/kivy-ios/toolchain.py
+
+      - name: Build kivy-ios toolchain
         run: |
           source venv/bin/activate
           cd ios/kivy-ios
-          chmod +x toolchain.py
           ./toolchain.py build python3 kivy
 
       - name: Create Xcode project
