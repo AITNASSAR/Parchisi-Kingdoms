@@ -26,7 +26,7 @@ jobs:
           python3 -m venv venv
           source venv/bin/activate
           pip install --upgrade pip
-          pip install cython sh pbxproj
+          pip install cython sh pbxproj cookiecutter
 
       - name: Clone kivy-ios repository
         run: |
