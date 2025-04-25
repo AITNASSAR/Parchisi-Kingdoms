@@ -14,41 +14,29 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Java 17
-        uses: actions/setup-java@v3
-        with:
-          distribution: temurin
-          java-version: '17'
+      - name: Validate assets
+        run: |
+          if [ ! -f assets/icon.png ]; then
+            echo "❌ Required file assets/icon.png is missing. Please add it to the repo."
+            exit 1
+          fi
 
-      - name: Verify Java version
-        run: java -version
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
-
-      - name: Install Buildozer & system dependencies
+      - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y python3-dev openjdk-17-jdk zip unzip zlib1g-dev libltdl-dev autoconf automake libtool libgl1-mesa-dev wget
-          pip install --upgrade pip
-          pip install cython buildozer
+          sudo apt-get install -y zip unzip openjdk-17-jdk python3-pip wget libgl1-mesa-dev
+          pip install --upgrade pip cython buildozer
 
-      - name: Download & configure Android SDK
+      - name: Setup Android SDK
         run: |
           mkdir -p $HOME/android-sdk/cmdline-tools
           wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O sdk-tools.zip
           unzip -q sdk-tools.zip -d $HOME/android-sdk/cmdline-tools
           mv $HOME/android-sdk/cmdline-tools/cmdline-tools $HOME/android-sdk/cmdline-tools/latest
           ln -s $HOME/android-sdk/cmdline-tools/latest $HOME/android-sdk/tools
-          export ANDROID_SDK_ROOT=$HOME/android-sdk
-          yes | $HOME/android-sdk/tools/bin/sdkmanager --sdk_root=$HOME/android-sdk --licenses
+          yes | $HOME/android-sdk/tools/bin/sdkmanager --licenses
           $HOME/android-sdk/tools/bin/sdkmanager --sdk_root=$HOME/android-sdk \
-            "platform-tools" \
-            "platforms;android-30" \
-            "build-tools;30.0.3" \
-            "ndk;21.3.6528147"
+            "platform-tools" "platforms;android-30" "build-tools;30.0.3" "ndk;21.3.6528147"
 
       - name: Link SDK into Buildozer path
         run: |
@@ -59,7 +47,6 @@ jobs:
       - name: Set environment variables
         run: |
           echo "ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
-          echo "$HOME/android-sdk/tools/bin" >> $GITHUB_PATH
           echo "$HOME/android-sdk/platform-tools" >> $GITHUB_PATH
           echo "$HOME/android-sdk/build-tools/30.0.3" >> $GITHUB_PATH
 
