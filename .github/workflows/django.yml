@@ -1,85 +1,73 @@
-- name: Set up Java 17
-  uses: actions/setup-java@v3
-  with:
-    distribution: temurin
-    java-version: '17'
-- name: Verify Java version
-  run: java -version
-``` |
-| **2. Unicode SyntaxError**<br>“invalid start byte 0xf6” | ملف بايثون (`badsyntax_pep3120.py`) يحتوي على حرف غير مصادق عليه أو لم يُحفَظ بترميز UTF-8. | احفظ الملف بترميز UTF-8، وأضف في أول سطر:  
-```python
-# -*- coding: utf-8 -*-
-print("böse")  # تأكد من أن الحرف ö محفوظ بشكل صحيح
-``` |
-| **3. Deprecated Cython IF-macros** | Cython أزال بعض صيغ `IF` القديمة في الملفات `.pyx`. | استبدل الـ macros بـ runtime conditions أو C macros. مثال:  
-```cython
-# من:
-IF SOMETHING:
-    # code
-# إلى:
-cdef bint cond = <boolean expression>
-if cond:
-    # code
-``` |
-
----
-
-## مثال كامل على خطوات Workflow مصحَّحة
-
-```yaml
 name: Build Kivy APK with Buildozer
 
-on: [push]
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
 
 jobs:
   build-apk:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    # 1) Java 17
-    - name: Set up Java 17
-      uses: actions/setup-java@v3
-      with:
-        distribution: temurin
-        java-version: '17'
-    - name: Verify Java version
-      run: java -version
+      - name: Set up Java 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: '17'
 
-    # 2) Python & Buildozer deps
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with: { python-version: '3.10' }
-    - name: Install system deps
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y python3-dev openjdk-17-jdk zip unzip zlib1g-dev libltdl-dev autoconf automake libtool
-        pip install --upgrade pip cython buildozer
+      - name: Verify Java version
+        run: java -version
 
-    # 3) Android SDK & AIDL
-    - name: Download & configure Android SDK
-      run: |
-        mkdir -p $HOME/android-sdk/cmdline-tools
-        wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O sdk-tools.zip
-        unzip -q sdk-tools.zip -d $HOME/android-sdk/cmdline-tools
-        mv $HOME/android-sdk/cmdline-tools/cmdline-tools $HOME/android-sdk/cmdline-tools/latest
-        ln -s $HOME/android-sdk/cmdline-tools/latest $HOME/android-sdk/tools
-        yes | $HOME/android-sdk/tools/bin/sdkmanager --sdk_root=$HOME/android-sdk --licenses
-        $HOME/android-sdk/tools/bin/sdkmanager --sdk_root=$HOME/android-sdk \
-          "platform-tools" "platforms;android-30" "build-tools;30.0.3" "ndk;21.3.6528147"
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
 
-    - name: Link SDK into Buildozer path
-      run: |
-        rm -rf ~/.buildozer/android/platform/android-sdk
-        mkdir -p ~/.buildozer/android/platform
-        ln -s $HOME/android-sdk ~/.buildozer/android/platform/android-sdk
+      - name: Install Buildozer & system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-dev openjdk-17-jdk zip unzip zlib1g-dev libltdl-dev autoconf automake libtool libgl1-mesa-dev wget
+          pip install --upgrade pip
+          pip install cython buildozer
 
-    - name: Build APK
-      run: buildozer --verbose android debug
+      - name: Download & configure Android SDK
+        run: |
+          mkdir -p $HOME/android-sdk/cmdline-tools
+          wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O sdk-tools.zip
+          unzip -q sdk-tools.zip -d $HOME/android-sdk/cmdline-tools
+          mv $HOME/android-sdk/cmdline-tools/cmdline-tools $HOME/android-sdk/cmdline-tools/latest
+          ln -s $HOME/android-sdk/cmdline-tools/latest $HOME/android-sdk/tools
+          export ANDROID_SDK_ROOT=$HOME/android-sdk
+          yes | $HOME/android-sdk/tools/bin/sdkmanager --sdk_root=$HOME/android-sdk --licenses
+          $HOME/android-sdk/tools/bin/sdkmanager --sdk_root=$HOME/android-sdk \
+            "platform-tools" \
+            "platforms;android-30" \
+            "build-tools;30.0.3" \
+            "ndk;21.3.6528147"
 
-    - name: Upload APK artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: parchisi-kingdoms-apk
-        path: bin/*.apk
+      - name: Link SDK into Buildozer path
+        run: |
+          rm -rf ~/.buildozer/android/platform/android-sdk
+          mkdir -p ~/.buildozer/android/platform
+          ln -s $HOME/android-sdk ~/.buildozer/android/platform/android-sdk
+
+      - name: Set environment variables
+        run: |
+          echo "ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
+          echo "$HOME/android-sdk/tools/bin" >> $GITHUB_PATH
+          echo "$HOME/android-sdk/platform-tools" >> $GITHUB_PATH
+          echo "$HOME/android-sdk/build-tools/30.0.3" >> $GITHUB_PATH
+
+      - name: Build APK
+        run: buildozer --verbose android debug
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: parchisi-kingdoms-apk
+          path: bin/*.apk
