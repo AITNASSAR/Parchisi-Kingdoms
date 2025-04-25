@@ -4,6 +4,11 @@ title               = Parchisi Kingdoms: Royal Edition
 package.name        = parchisi_kingdoms
 package.domain      = org.example
 
+android.release_keystore        = AITNASSAR_Younes.keystore
+android.release_keyalias        = AITNASSAR_Younes
+android.release_keystore_passwd = android
+android.release_keyalias_passwd = android
+
 # مجلّد المصدر والإصدار
 source.dir          = .
 source.include_exts = py,png,jpg,kv,json
