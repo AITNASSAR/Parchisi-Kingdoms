@@ -1,4 +1,3 @@
-[app]
 
 # Ù…Ø¹Ù„ÙˆÙ…Ø§Øª Ø§Ù„ØªØ·Ø¨ÙŠÙ‚
 title = Parchisi Kingdoms: Royal Edition
@@ -47,3 +46,5 @@ presplash.filename = assets/loading.png
 [buildozer]
 log_level = 2
 warn_on_root = 1
+
+android.icon = assets/icon.png
