@@ -1,30 +1,26 @@
 - name: Setup Android SDK
   run: |
-    # ایجاد دایرکتوری‌های موردنیاز
-    mkdir -p $HOME/android-sdk/cmdline-tools
-
     # دانلود Android Command Line Tools
+    mkdir -p $HOME/android-sdk/cmdline-tools
     wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O sdk-tools.zip
-
-    # اکسترکت فایل زیپ
     unzip -q sdk-tools.zip -d $HOME/android-sdk/cmdline-tools
-
-    # جابجایی برای داشتن ساختار صحیح
     mv $HOME/android-sdk/cmdline-tools/cmdline-tools $HOME/android-sdk/cmdline-tools/latest
 
-    # اضافه کردن مسیر به PATH برای این step
+    # اضافه کردن PATH برای cmdline-tools
+    echo "PATH=$HOME/android-sdk/cmdline-tools/latest/bin:$PATH" >> $GITHUB_ENV
     export PATH=$HOME/android-sdk/cmdline-tools/latest/bin:$PATH
 
-    # ثبت PATH در محیط کلی GitHub Actions برای استفاده در مراحل بعدی
-    echo "PATH=$HOME/android-sdk/cmdline-tools/latest/bin:$PATH" >> $GITHUB_ENV
-
-    # تایید خودکار همه‌ی لایسنس‌های SDK
+    # تایید خودکار لایسنس‌های گوگل
     yes | sdkmanager --licenses
 
-    # نصب ابزارهای لازم برای build
+    # نصب platform-tools, build-tools و ndk موردنیاز
     sdkmanager --sdk_root=$HOME/android-sdk \
       "platform-tools" \
       "platforms;android-31" \
       "build-tools;31.0.0" \
       "ndk;25.1.8937393"
 
+- name: Link SDK into Buildozer Path
+  run: |
+    mkdir -p ~/.buildozer/android/platform
+    ln -sfn $HOME/android-sdk ~/.buildozer/android/platform/android-sdk
