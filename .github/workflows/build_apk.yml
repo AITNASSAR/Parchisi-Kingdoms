@@ -1,10 +1,71 @@
-- name: Setup Android SDK
-  run: |
-    mkdir -p $HOME/android-sdk/cmdline-tools
-    wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O sdk-tools.zip
-    unzip -q sdk-tools.zip -d $HOME/android-sdk/cmdline-tools
-    mv $HOME/android-sdk/cmdline-tools/cmdline-tools $HOME/android-sdk/cmdline-tools/latest
-    export PATH=$HOME/android-sdk/cmdline-tools/latest/bin:$PATH
-    yes | sdkmanager --licenses
-    sdkmanager --sdk_root=$HOME/android-sdk \
-      "platform-tools" "platforms;android-31" "build-tools;31.0.0" "ndk;25.1.8937393"
+name: Build APK
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    env:
+      # تحدّد مسار Android SDK
+      ANDROID_SDK_ROOT: ${{ github.workspace }}/android-sdk
+
+    steps:
+    # 1. استنساخ المستودع
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    # 2. كاش لمجلد Android SDK
+    - name: Cache Android SDK
+      uses: actions/cache@v3
+      with:
+        path: ${{ env.ANDROID_SDK_ROOT }}
+        key: ${{ runner.os }}-android-sdk-${{ hashFiles('**/build.gradle', '**/buildozer.spec') }}
+        restore-keys: |
+          ${{ runner.os }}-android-sdk-
+
+    # 3. إعداد Java (OpenJDK 11)
+    - name: Setup Java
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: '11'
+
+    # 4. تثبيت Android SDK Command-Line Tools وتهيئة المسارات
+    - name: Setup Android SDK
+      run: |
+        mkdir -p $ANDROID_SDK_ROOT/cmdline-tools
+        wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O cmdline-tools.zip
+        unzip -q cmdline-tools.zip -d $ANDROID_SDK_ROOT/cmdline-tools
+        mv $ANDROID_SDK_ROOT/cmdline-tools/cmdline-tools $ANDROID_SDK_ROOT/cmdline-tools/latest
+
+        # إضافة sdkmanager وplatform-tools إلى PATH
+        echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
+        echo "PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools:$PATH" >> $GITHUB_ENV
+
+        # قبول التراخيص وتثبيت الأدوات المطلوبة
+        yes | sdkmanager --sdk_root=$ANDROID_SDK_ROOT --licenses
+        sdkmanager --sdk_root=$ANDROID_SDK_ROOT \
+          "platform-tools" \
+          "platforms;android-31" \
+          "build-tools;31.0.0" \
+          "ndk;25.1.8937393"
+
+    # 5. تثبيت متطلبات Python (إذا كان مشروعك يستخدم requirements.txt)
+    - name: Install Python dependencies
+      run: pip install --upgrade pip && pip install -r requirements.txt
+
+    # 6. بناء ملف الـ APK باستخدام Buildozer
+    - name: Build APK
+      run: buildozer -v android debug
+
+    # 7. (اختياري) عرض الـ APK كـ artifact للتحميل
+    - name: Upload APK
+      uses: actions/upload-artifact@v3
+      with:
+        name: my-app-debug-apk
+        path: bin/*.apk
