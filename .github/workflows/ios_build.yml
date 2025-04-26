@@ -59,11 +59,14 @@ jobs:
           cd ios/kivy-ios
           ./toolchain.py create ios myapp
 
-      - name: Ensure iOS build directory exists
+      - name: List ios/kivy-ios/myapp-ios contents
         run: |
-          # create folder if missing
+          echo ">>> ios/kivy-ios/myapp-ios directory <<<"
+          ls -la ios/kivy-ios/myapp-ios
+
+      - name: Ensure .xcodeproj exists
+        run: |
           mkdir -p ios/kivy-ios/myapp-ios
-          # verify Xcode project file
           if [ ! -f ios/kivy-ios/myapp-ios/myapp.xcodeproj/project.pbxproj ]; then
             echo "❌ The Xcode project is missing at ios/kivy-ios/myapp-ios/myapp.xcodeproj"
             exit 1
