@@ -1,80 +1,50 @@
-name: Build iOS App
+name: Build Kivy iOS App
 
 on:
-  push:
-    branches: ["main"]
-  pull_request:
-    branches: ["main"]
+  workflow_dispatch:
 
 jobs:
   build-ios:
     runs-on: macos-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v3
 
-      - name: Validate or generate icon placeholder
-        run: |
-          if [ ! -f assets/icon.png ]; then
-            echo "⚠️ assets/icon.png missing — generating placeholder"
-            mkdir -p assets
-            sips -z 512 512 /System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/GenericApplicationIcon.icns --out assets/icon.png
-          else
-            echo "✅ assets/icon.png found"
-          fi
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
 
-      - name: Install Autotools
-        run: |
-          brew update
-          brew install autoconf automake libtool pkg-config
+    - name: Install brew dependencies
+      run: |
+        brew install autoconf automake libtool pkg-config
 
-      - name: Set up Python & dependencies
-        run: |
-          python3 -m venv venv
-          source venv/bin/activate
-          pip install --upgrade pip
-          pip install cython sh pbxproj cookiecutter kivy-ios
+    - name: Install pip dependencies
+      run: |
+        python3 -m pip install --upgrade pip
+        pip install cython sh pbxproj cookiecutter kivy-ios
 
-      - name: Clone kivy-ios repository
-        run: |
-          source venv/bin/activate
-          git clone https://github.com/kivy/kivy-ios.git ios/kivy-ios
+    - name: Build python3 and kivy with toolchain
+      run: |
+        cd ios/kivy-ios
+        python3 toolchain.py clean
+        python3 toolchain.py build python3 kivy
 
-      - name: Build & Create Xcode project with toolchain
-        run: |
-          source venv/bin/activate
-          cd ios/kivy-ios
-          chmod +x toolchain.py
-          python3 toolchain.py build python3 kivy
-          python3 toolchain.py create ios myapp
+    - name: Create Xcode project
+      run: |
+        cd ios/kivy-ios
+        python3 toolchain.py create ios myapp
 
-      - name: Ensure Xcode project exists
-        run: |
-          if [ ! -f ios/kivy-ios/myapp-ios/myapp.xcodeproj/project.pbxproj ]; then
-            echo "❌ myapp.xcodeproj not found"
-            exit 1
-          fi
-          echo "✅ myapp.xcodeproj found"
+    - name: Debug Directory Structure
+      run: |
+        ls -R ios/kivy-ios/
 
-      - name: Sync app source into Xcode project
-        run: |
-          mkdir -p ios/kivy-ios/myapp-ios/myapp
-          rsync -a --delete ./ ios/kivy-ios/myapp-ios/myapp/
-
-      - name: Build IPA with xcodebuild
-        run: |
-          cd ios/kivy-ios/myapp-ios
-          xcodebuild -project myapp.xcodeproj \
-                     -scheme myapp \
-                     -configuration Release \
-                     -sdk iphoneos \
-                     CODE_SIGN_STYLE=Automatic \
-                     DEVELOPMENT_TEAM=${{ secrets.APPLE_DEV_TEAM }} \
-                     BUILD_DIR=build
-
-      - name: Archive .ipa artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: ios-app
-          path: ios/kivy-ios/myapp-ios/build/Release-iphoneos/*.ipa
+    - name: Ensure Xcode project exists
+      run: |
+        if [ ! -f ios/kivy-ios/myapp-ios/myapp.xcodeproj/project.pbxproj ]; then
+          echo "❌ myapp.xcodeproj not found"
+          ls -R ios/kivy-ios/myapp-ios/
+          exit 1
+        fi
+        echo "✅ myapp.xcodeproj found successfully."
