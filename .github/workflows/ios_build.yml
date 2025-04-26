@@ -40,7 +40,7 @@ jobs:
           source venv/bin/activate
           git clone https://github.com/kivy/kivy-ios.git ios/kivy-ios
 
-      - name: Fix toolchain.py shebang & permissions
+      - name: Fix & make toolchain.py executable
         run: |
           if ! grep -q '^#!/usr/bin/env python3' ios/kivy-ios/toolchain.py; then
             echo '#!/usr/bin/env python3' | cat - ios/kivy-ios/toolchain.py > temp && mv temp ios/kivy-ios/toolchain.py
@@ -59,21 +59,18 @@ jobs:
           cd ios/kivy-ios
           ./toolchain.py create ios myapp
 
-      - name: List ios/kivy-ios/myapp-ios contents
-        run: |
-          echo ">>> ios/kivy-ios/myapp-ios directory <<<"
-          ls -la ios/kivy-ios/myapp-ios
-
-      - name: Ensure .xcodeproj exists
+      - name: Ensure iOS build directory exists & debug
         run: |
           mkdir -p ios/kivy-ios/myapp-ios
+          echo ">>> ios/kivy-ios/myapp-ios contents <<<"
+          ls -al ios/kivy-ios/myapp-ios
           if [ ! -f ios/kivy-ios/myapp-ios/myapp.xcodeproj/project.pbxproj ]; then
-            echo "❌ The Xcode project is missing at ios/kivy-ios/myapp-ios/myapp.xcodeproj"
+            echo "❌ Missing Xcode project at ios/kivy-ios/myapp-ios/myapp.xcodeproj"
             exit 1
           fi
           echo "✅ Xcode project found"
 
-      - name: Sync app sources into Xcode project
+      - name: Sync app sources
         run: |
           mkdir -p ios/kivy-ios/myapp-ios/myapp
           rsync -a --delete ./ ./ios/kivy-ios/myapp-ios/myapp/
