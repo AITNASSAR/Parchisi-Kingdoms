@@ -14,12 +14,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Cleanup previous cookiecutter output
-        run: |
-          if [ -d "ios-ios" ]; then
-            rm -rf ios-ios
-          fi
-
       - name: Validate assets
         run: |
           if [ ! -f assets/icon.png ]; then
@@ -38,6 +32,7 @@ jobs:
           python3 -m venv venv
           source venv/bin/activate
           pip install --upgrade pip
+          # ensure 'sh' (and all other deps) are in the venv
           pip install sh cython pbxproj cookiecutter kivy-ios
 
       - name: Clone kivy-ios
@@ -45,7 +40,7 @@ jobs:
           source venv/bin/activate
           git clone https://github.com/kivy/kivy-ios.git ios/kivy-ios
 
-      - name: Build & Create Xcode project with toolchain
+      - name: Build & Create Xcode project
         run: |
           source venv/bin/activate
           cd ios/kivy-ios
@@ -53,8 +48,9 @@ jobs:
           python3 toolchain.py build python3 kivy
           python3 toolchain.py create ios myapp
 
-      - name: Ensure or regenerate Xcode project
+      - name: Ensure/regenerate Xcode project
         run: |
+          source venv/bin/activate
           mkdir -p ios/kivy-ios/myapp-ios
           if [ ! -f ios/kivy-ios/myapp-ios/myapp.xcodeproj/project.pbxproj ]; then
             echo "⚠️ myapp.xcodeproj missing—regenerating"
