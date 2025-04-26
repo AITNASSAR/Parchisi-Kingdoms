@@ -40,24 +40,20 @@ jobs:
           source venv/bin/activate
           cd ios/kivy-ios
           chmod +x toolchain.py
-          # Explicitly run under Python
           python3 toolchain.py build python3 kivy
           python3 toolchain.py create ios myapp
 
-      - name: List generated files
-        run: |
-          echo ">>> ios/kivy-ios/myapp-ios directory <<<"
-          ls -R ios/kivy-ios/myapp-ios || true
-
-      - name: Ensure or warn about missing Xcode project
+      - name: Ensure or regenerate Xcode project
         run: |
           mkdir -p ios/kivy-ios/myapp-ios
+          # If the project file is missing, regenerate it
           if [ ! -f ios/kivy-ios/myapp-ios/myapp.xcodeproj/project.pbxproj ]; then
-            echo "⚠️ Warning: Xcode project not found at ios/kivy-ios/myapp-ios/myapp.xcodeproj"
-            exit 1
-          else
-            echo "✅ Xcode project found"
+            echo "⚠️ myapp.xcodeproj missing—regenerating"
+            cd ios/kivy-ios
+            python3 toolchain.py create ios myapp
           fi
+          echo "✅ Now we have:"
+          ls -al ios/kivy-ios/myapp-ios
 
       - name: Sync app source into Xcode project
         run: |
