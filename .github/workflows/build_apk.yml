@@ -52,8 +52,13 @@ jobs:
     - name: Build APK
       run: buildozer -v android debug
 
+    - name: Debug APK path
+      run: |
+        echo "Contents of bin/ directory:" 
+        ls -al ${{ github.workspace }}/bin/
+
     - name: Upload APK
       uses: actions/upload-artifact@v3.1.2
       with:
         name: my-app-debug-apk
-        path: bin/*.apk
+        path: ${{ github.workspace }}/bin/*.apk
