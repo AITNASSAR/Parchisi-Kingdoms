@@ -58,7 +58,7 @@ jobs:
         ls -al ${{ github.workspace }}/bin/
 
     - name: Upload APK
-      uses: actions/upload-artifact@v3.1.2
+      uses: actions/upload-artifact@v3
       with:
         name: my-app-debug-apk
         path: ${{ github.workspace }}/bin/*.apk
