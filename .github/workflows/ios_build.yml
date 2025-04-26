@@ -40,8 +40,9 @@ jobs:
           source venv/bin/activate
           cd ios/kivy-ios
           chmod +x toolchain.py
-          ./toolchain.py build python3 kivy
-          ./toolchain.py create ios myapp
+          # Explicitly run under Python
+          python3 toolchain.py build python3 kivy
+          python3 toolchain.py create ios myapp
 
       - name: List generated files
         run: |
@@ -53,13 +54,12 @@ jobs:
           mkdir -p ios/kivy-ios/myapp-ios
           if [ ! -f ios/kivy-ios/myapp-ios/myapp.xcodeproj/project.pbxproj ]; then
             echo "⚠️ Warning: Xcode project not found at ios/kivy-ios/myapp-ios/myapp.xcodeproj"
-            echo "   You may need to check in that .xcodeproj or adjust your toolchain steps."
-            # exit 0   # <-- do not fail; proceed or uncomment to fail
+            exit 1
           else
             echo "✅ Xcode project found"
           fi
 
-      - name: Sync app sources
+      - name: Sync app source into Xcode project
         run: |
           mkdir -p ios/kivy-ios/myapp-ios/myapp
           rsync -a --delete ./ ./ios/kivy-ios/myapp-ios/myapp/
