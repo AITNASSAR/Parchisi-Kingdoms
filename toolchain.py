@@ -1,37 +1,43 @@
 #!/usr/bin/env python3
-
+import argparse
 import os
 import shutil
-import argparse
 from cookiecutter.main import cookiecutter
 
-# -------- CLI ARGUMENTS --------
-parser = argparse.ArgumentParser(description="🛠️ iOS Toolchain using Cookiecutter")
-parser.add_argument("--name", required=True, help="📱 App name (used as folder name)")
-parser.add_argument("--bundle-id", required=False, help="📦 App bundle identifier")
-parser.add_argument("--template", required=True, help="📁 Path or URL to cookiecutter template")
+def create_ios_project(app_name, bundle_id):
+    template_path = os.path.join(os.path.dirname(__file__), 'cookiecutter-ios-template')
 
-args = parser.parse_args()
+    output_dir = os.path.abspath(f"ios/kivy-ios/{app_name}-ios")
+    if os.path.exists(output_dir):
+        print(f"⚠️ Directory '{output_dir}' already exists. Removing it...")
+        shutil.rmtree(output_dir)
 
-# -------- VALIDATION --------
-output_dir = args.name
+    print(f"🚀 Generating iOS Xcode project for {app_name}...")
+    cookiecutter(
+        template_path,
+        no_input=True,
+        extra_context={
+            'project_name': app_name,
+            'bundle_id': bundle_id
+        },
+        output_dir=os.path.abspath('ios/kivy-ios')
+    )
+    print(f"✅ iOS Xcode project created at {output_dir}")
 
-# احذف المجلد إذا كان موجودًا لتجنب الخطأ
-if os.path.exists(output_dir):
-    print(f"⚠️ المجلد '{output_dir}' موجود مسبقًا — سيتم حذفه لتجنب الخطأ")
-    shutil.rmtree(output_dir)
+def main():
+    parser = argparse.ArgumentParser(description="Toolchain manager for iOS projects.")
+    subparsers = parser.add_subparsers(dest='command')
 
-# -------- COOKIECUTTER EXECUTION --------
-extra_context = {"project_name": args.name}
-if args.bundle_id:
-    extra_context["bundle_id"] = args.bundle_id
+    create_parser = subparsers.add_parser('create', help='Create a new iOS Xcode project.')
+    create_parser.add_argument('--name', required=True, help='App project name')
+    create_parser.add_argument('--bundle-id', required=True, help='Bundle identifier (e.g., com.example.myapp)')
 
-print(f"🚀 إنشاء مشروع iOS: '{args.name}' باستخدام القالب '{args.template}'...")
-cookiecutter(
-    template=args.template,
-    output_dir=".",
-    no_input=True,
-    extra_context=extra_context
-)
+    args = parser.parse_args()
 
-print("✅ تم إنشاء مشروع iOS بنجاح.")
+    if args.command == 'create':
+        create_ios_project(args.name, args.bundle_id)
+    else:
+        parser.print_help()
+
+if __name__ == '__main__':
+    main()
