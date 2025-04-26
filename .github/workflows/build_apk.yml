@@ -1,73 +1,10 @@
-name: Build Kivy APK with Buildozer
-
-on:
-  push:
-    branches: ["main"]
-  pull_request:
-    branches: ["main"]
-
-jobs:
-  build-apk:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Install system dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            python3 python3-pip openjdk-17-jdk zip unzip \
-            autoconf automake libtool pkg-config zlib1g-dev \
-            imagemagick
-          convert --version || { echo "❌ ImageMagick installation failed"; exit 1; }
-
-      - name: Validate or generate icon placeholder
-        run: |
-          if [ ! -f assets/icon.png ]; then
-            echo "⚠️ assets/icon.png missing — generating placeholder"
-            mkdir -p assets
-            convert -size 512x512 xc:transparent \
-              -fill black -gravity center -pointsize 48 \
-              -draw "text 0,0 'Placeholder'" assets/icon.png
-          else
-            echo "✅ assets/icon.png found"
-          fi
-
-      - name: Upgrade Buildozer & Cython
-        run: |
-          pip3 install --upgrade pip
-          pip3 install buildozer cython
-
-      - name: Setup Android SDK
-        run: |
-          mkdir -p $HOME/android-sdk/cmdline-tools
-          wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O sdk-tools.zip
-          unzip -q sdk-tools.zip -d $HOME/android-sdk/cmdline-tools
-          mv $HOME/android-sdk/cmdline-tools/cmdline-tools $HOME/android-sdk/cmdline-tools/latest
-          yes | $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses
-          $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --sdk_root=$HOME/android-sdk \
-            "platform-tools" "platforms;android-31" "build-tools;31.0.0" "ndk;25.1.8937393"
-
-      - name: Link SDK into Buildozer path
-        run: |
-          rm -rf ~/.buildozer/android/platform/android-sdk
-          mkdir -p ~/.buildozer/android/platform
-          ln -s $HOME/android-sdk ~/.buildozer/android/platform/android-sdk
-
-      - name: Set Android environment variables
-        run: |
-          echo "ANDROIDNDK=$HOME/android-sdk/ndk/25.1.8937393" >> $GITHUB_ENV
-          echo "ANDROIDAPI=31" >> $GITHUB_ENV
-          echo "ANDROIDMINAPI=21" >> $GITHUB_ENV
-
-      - name: Build APK (verbose)
-        run: |
-          buildozer --verbose android debug
-
-      - name: Upload APK artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: parchisi-kingdoms-apk
-          path: bin/*.apk
+- name: Setup Android SDK
+  run: |
+    mkdir -p $HOME/android-sdk/cmdline-tools
+    wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O sdk-tools.zip
+    unzip -q sdk-tools.zip -d $HOME/android-sdk/cmdline-tools
+    mv $HOME/android-sdk/cmdline-tools/cmdline-tools $HOME/android-sdk/cmdline-tools/latest
+    export PATH=$HOME/android-sdk/cmdline-tools/latest/bin:$PATH
+    yes | sdkmanager --licenses
+    sdkmanager --sdk_root=$HOME/android-sdk \
+      "platform-tools" "platforms;android-31" "build-tools;31.0.0" "ndk;25.1.8937393"
