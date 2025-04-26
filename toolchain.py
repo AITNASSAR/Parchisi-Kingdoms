@@ -1,30 +1,37 @@
 #!/usr/bin/env python3
 
-import argparse
 import os
-import sys
+import shutil
+import argparse
+from cookiecutter.main import cookiecutter
 
-def main():
-    parser = argparse.ArgumentParser(description="Kivy iOS toolchain")
-    parser.add_argument("command", help="build or create")
-    parser.add_argument("platform", help="ios")
-    parser.add_argument("name", help="App name")
-    args = parser.parse_args()
+# -------- CLI ARGUMENTS --------
+parser = argparse.ArgumentParser(description="🛠️ iOS Toolchain using Cookiecutter")
+parser.add_argument("--name", required=True, help="📱 App name (used as folder name)")
+parser.add_argument("--bundle-id", required=False, help="📦 App bundle identifier")
+parser.add_argument("--template", required=True, help="📁 Path or URL to cookiecutter template")
 
-    if args.command == "build":
-        print(f"🔨 Building {args.name} for {args.platform}...")
-        # simulate build
-        os.makedirs("build", exist_ok=True)
+args = parser.parse_args()
 
-    elif args.command == "create":
-        print(f"📦 Creating Xcode project for {args.name}...")
-        os.makedirs(f"{args.name}-ios", exist_ok=True)
-        with open(f"{args.name}-ios/{args.name}.xcodeproj", "w") as f:
-            f.write("// simulated Xcode project")
+# -------- VALIDATION --------
+output_dir = args.name
 
-    else:
-        print("❌ Unknown command")
-        sys.exit(1)
+# احذف المجلد إذا كان موجودًا لتجنب الخطأ
+if os.path.exists(output_dir):
+    print(f"⚠️ المجلد '{output_dir}' موجود مسبقًا — سيتم حذفه لتجنب الخطأ")
+    shutil.rmtree(output_dir)
 
-if __name__ == "__main__":
-    main()
+# -------- COOKIECUTTER EXECUTION --------
+extra_context = {"project_name": args.name}
+if args.bundle_id:
+    extra_context["bundle_id"] = args.bundle_id
+
+print(f"🚀 إنشاء مشروع iOS: '{args.name}' باستخدام القالب '{args.template}'...")
+cookiecutter(
+    template=args.template,
+    output_dir=".",
+    no_input=True,
+    extra_context=extra_context
+)
+
+print("✅ تم إنشاء مشروع iOS بنجاح.")
