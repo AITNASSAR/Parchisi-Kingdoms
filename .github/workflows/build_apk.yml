@@ -57,8 +57,16 @@ jobs:
         echo "Contents of bin/ directory:" 
         ls -al ${{ github.workspace }}/bin/
 
-    - name: Upload APK
-      uses: actions/upload-artifact@v3
-      with:
-        name: my-app-debug-apk
-        path: ${{ github.workspace }}/bin/*.apk
+    - name: Upload APK (v3)
+  uses: actions/upload-artifact@v3
+  continue-on-error: true
+  with:
+    name: my-app-debug-apk-v3
+    path: ${{ github.workspace }}/bin/*.apk
+
+- name: Upload APK (v2 fallback)
+  if: always()
+  uses: actions/upload-artifact@v2
+  with:
+    name: my-app-debug-apk-v2
+    path: ${{ github.workspace }}/bin/*.apk
