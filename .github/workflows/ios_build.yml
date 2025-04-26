@@ -40,25 +40,23 @@ jobs:
           source venv/bin/activate
           git clone https://github.com/kivy/kivy-ios.git ios/kivy-ios
 
-      - name: Generate Xcode project with toolchain
+      - name: Build kivy-ios toolchain
         run: |
           source venv/bin/activate
           cd ios/kivy-ios
-          # Ensure toolchain.py is executable
-          chmod +x toolchain.py
-          # Build the iOS toolchain
-          ./toolchain.py build python3 kivy
-          # Create the Xcode project
-          ./toolchain.py create ios myapp
+          python3 ./toolchain.py build python3 kivy
 
-      - name: List generated files
+      - name: Create Xcode project
         run: |
-          echo "Contents of ios/kivy-ios/myapp-ios/:"
-          ls -R ios/kivy-ios/myapp-ios || true
+          source venv/bin/activate
+          cd ios/kivy-ios
+          python3 ./toolchain.py create ios myapp
 
-      - name: Ensure Xcode project exists
+      - name: Ensure iOS build directory exists & debug
         run: |
           mkdir -p ios/kivy-ios/myapp-ios
+          echo ">>> ios/kivy-ios/myapp-ios contents <<<"
+          ls -al ios/kivy-ios/myapp-ios
           if [ ! -f ios/kivy-ios/myapp-ios/myapp.xcodeproj/project.pbxproj ]; then
             echo "❌ Missing Xcode project at ios/kivy-ios/myapp-ios/myapp.xcodeproj"
             exit 1
